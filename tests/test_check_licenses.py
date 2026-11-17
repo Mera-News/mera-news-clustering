@@ -20,3 +20,9 @@ def test_gpl_2_fails():
 
 def test_proprietary_classifier_fails():
     assert not check_licenses.verdict(None, None, ["License :: Other/Proprietary License"])
+
+
+def test_or_inside_a_group_cannot_hide_a_bad_licence():
+    assert not check_licenses.verdict("(MIT OR Apache-2.0) AND LicenseRef-Proprietary", None, [])
+    assert check_licenses.verdict("(MIT OR Apache-2.0) AND BSD-3-Clause", None, [])
+    assert check_licenses.verdict("MIT OR LicenseRef-Proprietary", None, [])

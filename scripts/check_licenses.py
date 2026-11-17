@@ -28,8 +28,11 @@ EXCEPTIONS = [
 
 def _expression_ok(expression: str) -> bool:
     expression = re.sub(r"\s+WITH\s+[\w.\-+]+", "", expression)  # the exception after WITH is ignored
-    expression = expression.replace("(", " ").replace(")", " ")
-    # shortcut: AND/OR are not nested by precedence, OR splits first; fine for real package metadata
+    if "(" in expression:
+        # shortcut: grouped expressions need every id allowed (may fail a valid one, never passes a bad one);
+        # parse the grouping if a real package trips it
+        return all(i in ALLOWED_IDS for i in re.findall(r"[\w.\-+]+", expression) if i not in ("AND", "OR"))
+    # AND binds tighter than OR, so split on OR first
     return any(
         all(i in ALLOWED_IDS for i in re.split(r"\s+AND\s+", alt.strip()))
         for alt in re.split(r"\s+OR\s+", expression)
@@ -60,7 +63,8 @@ def main(argv: list[str]) -> int:
         checked += 1
         if verdict(expression, text, classifiers):
             continue
-        reason = next((r for p, r in EXCEPTIONS if p.match(name.lower())), None) if use_exceptions else None
+        normalized = re.sub(r"[-_.]+", "-", name.lower())  # PEP 503: metadata may spell cuda_bindings
+        reason = next((r for p, r in EXCEPTIONS if p.match(normalized)), None) if use_exceptions else None
         if reason:
             print(f"EXCEPTION {name} {version}: {reason}")
             continue
