@@ -1,0 +1,62 @@
+# syntax=docker/dockerfile:1
+#
+# news-clustering-job.
+#
+# One image runs both ways with the SAME code:
+#   prod (L4 GPU):  python -m cuml.accel -m src.job_main_mongo (RAPIDS zero-code-change)
+#   CPU / CI / dev: python -m src.job_main_mongo               (no GPU needed)
+#
+# CUDA runtime libs arrive as nvidia-* pip wheels from PyPI; the driver comes
+# from the GPU host (cu12-compatible). No conda, no RAPIDS base image, no
+# model download: clustering only.
+#
+# Build for linux/amd64 (the L4 host arch). On non-amd64 hosts build with
+# `docker buildx build --platform=linux/amd64`.
+FROM --platform=linux/amd64 python:3.14-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV LOG_LEVEL=info
+ENV CLUSTERING_GPU=true
+
+WORKDIR /app
+
+# Deps come from requirements-gpu.txt: the one pin list (requirements.txt) plus
+# cuml-cu12. cuML and its RAPIDS deps resolve on PyPI proper. ~6-8 GB of CUDA
+# wheels; Cloud Run image streaming keeps boot fast. The exact sklearn/hdbscan
+# pins matter: cuml-cu12 declares only `scikit-learn>=1.6`, so without them pip
+# would resolve whatever is newest and CI/dev would no longer match prod.
+COPY requirements.txt requirements-gpu.txt ./
+# pymongo's zstd wire compression uses the 3.14 stdlib module (no package);
+# fail the build if this base image was compiled without it.
+RUN pip install --no-cache-dir -r requirements-gpu.txt \
+ && pip check \
+ && python -c "import compression.zstd"
+
+# Application code.
+COPY src/ src/
+
+# Which composition root to launch, selected at deploy time WITHOUT rebuilding
+# (env override). Default is the live Mongo clustering path. Runs CPU (plain
+# python) or GPU (cuml.accel intercepts the hdbscan import) with the SAME code —
+# the launcher below is agnostic to the entrypoint.
+ENV JOB_ENTRYPOINT=src.job_main_mongo
+
+# Launcher gates cuml.accel on CLUSTERING_GPU (default true above → the prod L4
+# GPU launch).
+#
+#   CLUSTERING_GPU=true  — launches via cuml.accel and REQUIRES a GPU-provisioned
+#     host (a GPU node and a GPU limit on the job).
+#     cuml.accel needs a CUDA driver even to INITIALIZE: flipping this env alone
+#     on a CPU-only job dies at boot with cudaErrorInsufficientDriver, before any
+#     application code runs. The env var and the GPU provisioning must flip
+#     TOGETHER.
+#   CLUSTERING_GPU=false — plain `python -m $JOB_ENTRYPOINT`: same code, CPU
+#     hdbscan path, cuml never imported. No GPU/driver needed.
+#
+# Shell form so both vars expand at container start.
+CMD if [ "$CLUSTERING_GPU" = "true" ]; then \
+      exec python -m cuml.accel -m $JOB_ENTRYPOINT; \
+    else \
+      exec python -m $JOB_ENTRYPOINT; \
+    fi

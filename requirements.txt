@@ -1,0 +1,20 @@
+# news-clustering-job dependencies (CPU / CI / dev-harness).
+#
+# The only pin list. The prod GPU image installs requirements-gpu.txt, which is
+# this file plus `cuml-cu12`; cuml is NOT listed here because CI and local runs
+# use the CPU `hdbscan` path (same code, accelerated only under cuml.accel).
+#
+# IO is Mongo (pymongo) in → HDBSCAN → Mongo out — pure Mongo↔Mongo, no callback.
+pydantic-settings==2.16.2
+# numpy, scikit-learn, hdbscan and cuml-cu12 (requirements-gpu.txt) move together.
+# numpy stays <2.5: cuml-cu12 26.10 caps numba <0.65, and numba 0.64 caps numpy <2.5.
+numpy==2.4.6
+scikit-learn==1.9.1
+hdbscan==0.8.44
+# ADC token for the singleton guard (run.jobs REST).
+# "No module named 'google'" killed the first prod run at bootstrap.
+google-auth==2.62.0
+# google.auth.transport.requests needs it (google-auth does not depend on it).
+requests==2.34.2
+# Mongo IO (src/mongo/, src/job_main_mongo.py) — reads embeddings, writes clusters.
+pymongo==4.19.0

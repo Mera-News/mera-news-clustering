@@ -1,0 +1,9 @@
+# clustering-job dev/test deps (the CPU hdbscan path).
+-r requirements.txt
+
+# Testing
+pytest==9.2.0
+pytest-cov==7.1.0
+
+# Linting
+ruff==0.17.3

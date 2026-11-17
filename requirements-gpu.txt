@@ -1,0 +1,5 @@
+# Prod GPU image deps (Dockerfile.clustering): the CPU pins plus cuML, which runs
+# the plain `hdbscan` fit on the L4 under `python -m cuml.accel`. Moves together
+# with numpy / scikit-learn / hdbscan in requirements.txt.
+-r requirements.txt
+cuml-cu12==26.10.*
