@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      # 3.14: the job negotiates zstd compression through the standard library.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install "$(grep '^ruff==' requirements-dev.txt)"
+      - run: ruff check .
+
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      # The CPU install must pass with no exceptions, so the CPU path can never pull a proprietary wheel.
+      - name: Licences of the CPU install
+        run: python scripts/check_licenses.py --no-exceptions
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongod-8.2.6-ubuntu2404
+      - name: Fetch mongod
+        run: |
+          B=~/.cache/mongodb-binaries/mongod-x64-ubuntu2404-8.2.6
+          if [ ! -x "$B" ]; then
+            mkdir -p "$(dirname "$B")"
+            curl -fsSL https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2404-8.2.6.tgz \
+              | tar -xzO --wildcards '*/bin/mongod' > "$B"
+            chmod +x "$B"
+          fi
+          echo "MONGOD_BIN=$B" >> "$GITHUB_ENV"
+      - run: python -m pytest
+
+  e2e:
+    runs-on: ubuntu-24.04
+    services:
+      mongo:
+        image: mongo:8.2
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping: 1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      MONGODB_URI: mongodb://localhost:27017/e2e
+      E2E_IMAGE: mera-news-clustering:ci
+    steps:
+      # The image is amd64 and carries several GB of GPU wheels: make room before building.
+      - name: Free disk for the CUDA wheels
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+      - run: docker build -f Dockerfile.clustering -t "$E2E_IMAGE" .
+      # The NVIDIA wheels are allowed here by name only: they are the optional GPU runtime.
+      - name: Licences of the image
+        run: docker run --rm -i "$E2E_IMAGE" python - < scripts/check_licenses.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      # The image runs on CPU here (CLUSTERING_GPU=false), twice, against the Mongo service.
+      - run: python -m pytest e2e --no-cov
