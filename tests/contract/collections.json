@@ -1,0 +1,16 @@
+{
+  "_source": "Mirrors mera-news-data-server libs/mera-models/src/models/news-article.model.ts, news-cluster.model.ts and cluster-article-link.model.ts. Change them together.",
+  "news-article": {
+    "read": {"_id": "objectId", "article_url": "string", "createdAt": "date", "embedding_article_data_text_matching": "array"},
+    "stamp": {"processingStatus": "string", "aggregationCompletedAt": "date", "updatedAt": "date"},
+    "stampValues": {"processingStatus": "aggregation_successful"}
+  },
+  "news-cluster": {
+    "required": {"_id": "objectId", "clusterSize": "int", "clusteringRunId": "string", "createdAt": "date", "updatedAt": "date"},
+    "optional": {"stableClusterId": "string"}
+  },
+  "cluster-article-link": {
+    "required": {"_id": "objectId", "clusterId": "objectId", "articleId": "objectId", "confidence": "double", "createdAt": "date", "clusteringRunId": "string"},
+    "optional": {}
+  }
+}

@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-addopts = "--cov=src --cov-report=term-missing --cov-fail-under=40 -v"
+addopts = "--cov=src --cov-report=term-missing --cov-fail-under=85 -v"
 testpaths = ["tests"]
 
 [tool.coverage.run]
