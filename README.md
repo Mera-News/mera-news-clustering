@@ -4,7 +4,7 @@ The clustering job behind Mera News, by Mera Labs B.V. It groups news articles t
 
 ## How it fits
 
-The data server reads feeds, creates embeddings and stores articles. This job reads those articles from the database and writes clusters next to them. It runs once and exits, so it is meant to be started on a schedule, for example every hour. The job does not call the data server and the data server does not call the job: they share the database.
+The data server reads feeds, creates embeddings and stores articles. This job reads those articles from the database and writes clusters next to them. It runs once and exits, so it is meant to be started on a schedule, for example every hour. The job does not call the data server and the data server does not call the job: they share the database. mera-news-data-server then uses the clusters to link topics to stories, build headline editions, and return each article's cluster membership from its news API.
 
 | Collection | What the job does |
 |---|---|
@@ -98,11 +98,11 @@ Known limit: one story often ends up split across several clusters.
 
 ## Logs
 
-The job writes one JSON object per line to stdout. The levels are `info` for the run narrative, `warn` for dropped or skipped items, and `error` for failures that stop the run. There is no `debug` level.
+The job writes one JSON object per line to stdout. The levels are `info` for the run narrative, `warn` for recoverable problems such as a database retry, and `error` for failures that stop the run. There is no `debug` level.
 
 The line with the message `run_summary` closes a run. Its main fields are `windowArticles`, `clusters`, `multiArticleClusters`, `singletons`, `stableCarried`, `stableMinted`, `maxClusterSize`, `clusteringRunId` and the stage timings (`fetchMs`, `fitMs`, `persistMs`, `durationMs`).
 
-The job exits non-zero only when the infrastructure fails: the database is unreachable or the clustering library does not start. An empty window is a normal exit.
+The job exits non-zero only when the infrastructure fails: the database is unreachable or a read or write fails, the configuration cannot be used (for example a compressor the driver cannot load), or the clustering library does not start. An empty window is a normal exit.
 
 ## Checking a dependency upgrade
 
