@@ -1,6 +1,6 @@
 # mera-news-clustering
 
-The clustering job behind Mera News, by Mera Labs B.V. It groups news articles that report the same story. It reads the embedded articles that mera-news-data-server stores in MongoDB, clusters them with HDBSCAN, and writes the clusters back. The same code runs on a CPU, or on an NVIDIA GPU. It is licensed under the AGPL-3.0.
+The clustering job behind Mera News, by Mera Labs B.V. It groups news articles that report the same story. It reads the embedded articles that mera-news-data-server stores in MongoDB, clusters them with HDBSCAN, and writes the clusters back. The same code runs on a CPU, or on an NVIDIA GPU. It is source-available under the PolyForm Shield License 1.0.0.
 
 ## How it fits
 
@@ -46,7 +46,7 @@ MONGODB_URI="mongodb+srv://user:password@host/database" make run-cpu
 
 Running on a GPU needs a linux/amd64 host with an NVIDIA driver for CUDA 12, and `CLUSTERING_GPU=true`, which is the default in the Docker image. The image then starts the job through `python -m cuml.accel`, which runs the same HDBSCAN code on the GPU. With `CLUSTERING_GPU=true` and no GPU the job fails at boot.
 
-The GPU image installs NVIDIA's CUDA libraries from PyPI. Those libraries are proprietary and come under NVIDIA's own licence terms, not the AGPL. This repository's code is AGPL-3.0-only, and the CPU install (`make setup`, or `requirements.txt`) uses none of NVIDIA's libraries. The Docker image as built here installs them even when run with `CLUSTERING_GPU=false`.
+The GPU image installs NVIDIA's CUDA libraries from PyPI. Those libraries are proprietary and come under NVIDIA's own licence terms, not this repository's licence. This repository's code is under the PolyForm Shield License 1.0.0, and the CPU install (`make setup`, or `requirements.txt`) uses none of NVIDIA's libraries. The Docker image as built here installs them even when run with `CLUSTERING_GPU=false`.
 
 ## Configuration
 
@@ -124,14 +124,22 @@ make test
 
 The pure tests need nothing. The integration tests start a real `mongod`: set `MONGOD_BIN` to the path of a MongoDB 8.x server binary, or put `mongod` on your path. Tests run with coverage, and the gate is in `pyproject.toml`. The image end-to-end test and the licence check run in CI.
 
-## License
+## Licence
 
-AGPL-3.0-only. See [LICENSE](LICENSE). If the AGPL does not fit your use, see [COMMERCIAL.md](COMMERCIAL.md). The names and logos are covered by [TRADEMARK.md](TRADEMARK.md).
+Copyright Mera Labs B.V.
 
-Mera Labs B.V. uses "Mera", "Mera News" and the Mera logos as its trademarks; none is registered yet. Nobody may ship a fork, a modified build or a hosted service based on this code under the name Mera or Mera News.
+Required Notice: Copyright Mera Labs B.V. (https://mera.news)
 
-Mera Labs B.V. can offer a commercial license to organisations that cannot meet the AGPL's terms. To ask about one, write to contact@mera.news.
+This code is source-available under the PolyForm Shield License 1.0.0. See `LICENSE`.
+
+In short: you may run it, change it and build on it for any purpose, except to provide a product
+that competes with this software or with a product Mera Labs provides using it, such as Mera News.
+This summary is not the licence. The `LICENSE` file is.
+
+Mera News and Mera Protocol are trademarks. See `TRADEMARK.md`.
+For a use the licence does not allow, see `COMMERCIAL.md`.
+To contribute, see `CONTRIBUTING.md`.
 
 ## Contributing
 
-Issues are welcome. Code contributions are not accepted yet.
+Issues and pull requests are welcome. See `CONTRIBUTING.md`.

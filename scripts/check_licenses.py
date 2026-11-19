@@ -11,7 +11,6 @@ from importlib.metadata import distributions
 ALLOWED_IDS = {
     "MIT", "MIT-0", "BSD-2-Clause", "BSD-3-Clause", "0BSD", "Apache-2.0", "ISC", "PSF-2.0", "Python-2.0",
     "MPL-2.0", "LGPL-2.1-or-later", "LGPL-3.0-or-later", "LGPL-3.0-only", "Unlicense", "Zlib", "CC0-1.0",
-    "GPL-3.0-or-later", "AGPL-3.0-only", "AGPL-3.0-or-later",
 }
 ALLOWED_CLASSIFIERS = (
     "MIT License", "BSD License", "Apache Software License", "ISC License", "Python Software Foundation License",
