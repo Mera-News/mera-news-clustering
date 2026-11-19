@@ -128,7 +128,7 @@ The pure tests need nothing. The integration tests start a real `mongod`: set `M
 
 AGPL-3.0-only. See [LICENSE](LICENSE). If the AGPL does not fit your use, see [COMMERCIAL.md](COMMERCIAL.md). The names and logos are covered by [TRADEMARK.md](TRADEMARK.md).
 
-"Mera", "Mera News" and the Mera logos are trademarks of Mera Labs B.V., a company based in Amsterdam, the Netherlands. Nobody may ship a fork, a modified build or a hosted service based on this code under the name Mera or Mera News.
+Mera Labs B.V. uses "Mera", "Mera News" and the Mera logos as its trademarks; none is registered yet. Nobody may ship a fork, a modified build or a hosted service based on this code under the name Mera or Mera News.
 
 Mera Labs B.V. can offer a commercial license to organisations that cannot meet the AGPL's terms. To ask about one, write to contact@mera.news.
 
