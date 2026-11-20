@@ -3,7 +3,7 @@
 # news-clustering-job.
 #
 # One image runs both ways with the SAME code:
-#   prod (L4 GPU):  python -m cuml.accel -m src.job_main_mongo (RAPIDS zero-code-change)
+#   GPU:            python -m cuml.accel -m src.job_main_mongo (RAPIDS zero-code-change)
 #   CPU / CI / dev: python -m src.job_main_mongo               (no GPU needed)
 #
 # CUDA runtime libs arrive as nvidia-* pip wheels from PyPI; the driver comes
@@ -25,7 +25,7 @@ WORKDIR /app
 # cuml-cu12. cuML and its RAPIDS deps resolve on PyPI proper. ~6-8 GB of CUDA
 # wheels; Cloud Run image streaming keeps boot fast. The exact sklearn/hdbscan
 # pins matter: cuml-cu12 declares only `scikit-learn>=1.6`, so without them pip
-# would resolve whatever is newest and CI/dev would no longer match prod.
+# would resolve whatever is newest and a CPU run would no longer match the GPU image.
 COPY requirements.txt requirements-gpu.txt ./
 # pymongo's zstd wire compression uses the 3.14 stdlib module (no package);
 # fail the build if this base image was compiled without it.
@@ -42,8 +42,8 @@ COPY src/ src/
 # the launcher below is agnostic to the entrypoint.
 ENV JOB_ENTRYPOINT=src.job_main_mongo
 
-# Launcher gates cuml.accel on CLUSTERING_GPU (default true above → the prod L4
-# GPU launch).
+# Launcher gates cuml.accel on CLUSTERING_GPU (default true above → the GPU
+# launch).
 #
 #   CLUSTERING_GPU=true  — launches via cuml.accel and REQUIRES a GPU-provisioned
 #     host (a GPU node and a GPU limit on the job).

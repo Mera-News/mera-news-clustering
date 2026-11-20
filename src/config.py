@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     # Cursor batch size for the window read (larger batch = fewer getMore
     # round-trips over the wire). FETCH_PARALLELISM > 1 splits [cutoff, now] into
     # N equal createdAt sub-ranges fetched on a thread pool then concatenated.
-    # Staging measured (22.6k articles, 2026-07-20): 1->14.2s, 2->6.5s, 4->6.0s,
+    # Measured on 22.6k articles (2026-07-20): 1->14.2s, 2->6.5s, 4->6.0s,
     # 8->15.1s (regresses — BSON-decode/cursor contention); parallel fetch
     # saturates ~4, so that's the default. Primary reads also measured faster
     # than secondaryPreferred at parallelism 1 (14.2s vs 16.3s), and keep this

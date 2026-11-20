@@ -17,7 +17,7 @@ cron, not by this job. Only infra failures (Mongo unreachable,
 hdbscan/GPU init) exit non-zero; an empty window is a clean exit 0.
 
 Launch:
-  prod (L4 GPU): python -m cuml.accel -m src.job_main_mongo
+  GPU:           python -m cuml.accel -m src.job_main_mongo
   CPU / CI/dev:  python -m src.job_main_mongo
 """
 from __future__ import annotations

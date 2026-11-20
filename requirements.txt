@@ -1,6 +1,6 @@
 # news-clustering-job dependencies (CPU / CI / dev-harness).
 #
-# The only pin list. The prod GPU image installs requirements-gpu.txt, which is
+# The only pin list. The GPU image installs requirements-gpu.txt, which is
 # this file plus `cuml-cu12`; cuml is NOT listed here because CI and local runs
 # use the CPU `hdbscan` path (same code, accelerated only under cuml.accel).
 #
@@ -12,7 +12,7 @@ numpy==2.4.6
 scikit-learn==1.9.1
 hdbscan==0.8.44
 # ADC token for the singleton guard (run.jobs REST).
-# "No module named 'google'" killed the first prod run at bootstrap.
+# Without it the job fails at bootstrap with "No module named 'google'".
 google-auth==2.62.0
 # google.auth.transport.requests needs it (google-auth does not depend on it).
 requests==2.34.2

@@ -96,7 +96,7 @@ class ClusterService:
         # Provenance: which hdbscan module resolved, and whether cuml is loaded —
         # under `python -m cuml.accel` cuml.accel intercepts the hdbscan import
         # and routes the fit to the GPU. Logging the module path + cuml presence
-        # proves (in prod logs) that interception actually happened. Emitted via
+        # proves (in the job's logs) that interception actually happened. Emitted via
         # the structured JobLogger (JSON to stdout) — the stdlib `logger` above
         # has no configured handler in this job, so those lines never reach
         # Cloud Logging. `job_logger` defaults to None so callers/tests that

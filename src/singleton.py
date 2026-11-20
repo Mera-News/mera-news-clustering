@@ -88,7 +88,7 @@ def _decide_once(
         return SingletonDecision(run=True)
 
     # An execution cancelled while queued can keep completionTime unset
-    # FOREVER (observed in prod: cancelledCount=1, no completionTime) —
+    # FOREVER (observed: cancelledCount=1, no completionTime) —
     # terminal task counts also mean "not running" (task_count is 1).
     def _is_running(e: dict) -> bool:
         if e.get("completionTime"):
